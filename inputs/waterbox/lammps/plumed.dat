@@ -1,0 +1,20 @@
+soap: METATOMIC ...
+    EXTENSIONS_DIRECTORY=./metatomic_extensions
+    SPECIES1=1-1534:3
+    SPECIES2=2-1535:3,3-1536:3
+    SPECIES3=1537
+    SPECIES_TO_TYPES=8,1,6
+    SELECTED_ATOMS=1537
+    MODEL=metatomic.pt
+...
+
+opes: OPES_METAD_EXPLORE ...
+    ARG=soap.*
+    PACE=500
+    TEMP=300
+    BARRIER=20
+    FILE=Kernels.data
+...
+
+PRINT ARG=soap.*,opes.* STRIDE=500 FILE=COLVAR
+FLUSH STRIDE=1

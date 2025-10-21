@@ -1,0 +1,1 @@
+python scripts/md.py --config config-md.yaml

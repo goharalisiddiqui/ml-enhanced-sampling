@@ -1,0 +1,93 @@
+# Enhanced LAMMPS input script for Alanine Dipeptide with CHARMM-like force field
+# This version uses more realistic force field parameters
+
+units           real
+dimension       3
+boundary        p p p
+atom_style      full
+
+# Read data file
+read_data       ala2.data
+
+# Define realistic force field parameters based on CHARMM
+pair_style      lj/cut/coul/long 12.0
+
+# LJ parameters: epsilon (kcal/mol), sigma (Angstrom)
+pair_coeff      1 1 0.0860 3.3997  # CT (aliphatic carbon)
+pair_coeff      2 2 0.1700 3.2500  # N (amide nitrogen)
+pair_coeff      3 3 0.2100 2.9600  # O (carbonyl oxygen)
+pair_coeff      4 4 0.0460 0.4000  # H (hydrogen)
+
+# Cross interactions (Lorentz-Berthelot mixing)
+pair_modify     mix geometric
+
+# Bond parameters: K (kcal/mol/A^2), r0 (Angstrom)
+bond_style      harmonic
+bond_coeff      1 317.0 1.522   # C-C
+bond_coeff      2 337.0 1.449   # C-N
+bond_coeff      3 570.0 1.229   # C=O
+bond_coeff      4 340.0 1.090   # C-H
+bond_coeff      5 434.0 1.010   # N-H
+
+# Angle parameters: K (kcal/mol/rad^2), theta0 (degrees)
+angle_style     harmonic
+angle_coeff     1 58.35 113.00  # C-C-C
+angle_coeff     2 80.00 116.50  # C-C-N
+angle_coeff     3 80.00 120.40  # C-N-C
+angle_coeff     4 50.00 109.50  # C-C-H
+angle_coeff     5 51.50 109.50  # H-C-H
+angle_coeff     6 35.00 119.15  # C-N-H
+angle_coeff     7 80.00 122.90  # O-C-N
+
+# Dihedral parameters: K (kcal/mol), n, d (degrees)
+dihedral_style  harmonic
+dihedral_coeff  1 1.40 1 180.0  # Generic backbone
+dihedral_coeff  2 0.20 3 0.0    # Methyl rotation
+
+# Coulombic interactions
+kspace_style    pppm 1.0e-4
+
+# Neighbor settings
+neighbor        2.0 bin
+neigh_modify    delay 0 every 20 check no
+
+# Constraints for bonds involving hydrogen
+fix             constraints all shake 1.0e-4 20 0 b 4 5
+
+# Thermostat (Nose-Hoover)
+fix             thermostat all nvt temp 300.0 300.0 100.0
+
+# Output settings
+thermo          1000
+thermo_style    custom step temp press pe ke etotal vol density
+
+# Trajectory output
+dump            traj all custom 1000 trajectory.lammpstrj id type x y z
+dump_modify     traj element C N O H
+
+# Restart files
+restart         50000 restart.*.lmp
+
+# Energy minimization
+print           "Starting energy minimization..."
+minimize        1.0e-4 1.0e-6 1000 10000
+print           "Energy minimization completed"
+
+# Initial velocities
+velocity        all create 300.0 12345 dist gaussian
+
+# Equilibration phase
+print           "Starting equilibration..."
+reset_timestep  0
+timestep        1.0
+run             100000
+print           "Equilibration completed"
+
+# Production run
+print           "Starting production run..."
+write_restart   equilibrated.restart
+run             1000000
+print           "Production run completed"
+
+write_restart   final.restart
+print           "Simulation completed successfully!"

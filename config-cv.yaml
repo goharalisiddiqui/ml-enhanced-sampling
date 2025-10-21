@@ -1,0 +1,100 @@
+debug: False
+outpath: ./train_runs
+outfolder: MAPI/run
+overwrite: False
+nexp: 2
+output_to_file: True
+save_checkpoint: True
+save_serial_model: False
+save_metatomic: True
+metatomic_metadata:
+  name: ml-collective-variable
+  description: Collective variable learned using CollectiveEncoder
+  authors: ['SNE']
+  references: []
+# output_traj: True
+# load_model: <path_to_model>
+
+# Trainer Settings
+nepochs: 1000
+early_stopping: True
+early_stopping_args:
+    patience: 100
+weight_decay: 0.0
+nogpu: False
+export_latent: False
+wandb: True
+wandb_project: MAPI-CV
+wandb_entity: goharalisiddiqui-tum
+
+lrate: 0.001
+
+data_name: XTC
+data_args:
+    ##### ALANINE DATASET #####
+    # tprfile: ./data/ala2_300K_100ns/md.tpr
+    # xtcfile: ./data/ala2_300K_100ns/md.xtc
+    # selection: "(resname ALA or resname ACE or resname NME) and not element H" # ALANINE: All non-H atoms
+    # label_dihedrals :
+    #   - phi_2
+    #   - psi_2
+    # dataset_args :
+    #   cutoff: 5.0
+    #   selected_atoms: [5]
+    #   max_angular: 0 # only for SOAP_PS
+    #   n_radial: 1
+    #   angular_list : [4,6] # only for SOAP
+    ###########################
+
+    ##### WATERBOX DATASET #####
+    # tprfile: ./data/water-box/waterbox_300K_100ns/waterbox.data
+    # xtcfile: ./data/water-box/waterbox_300K_100ns/system.xtc
+    # # selection: "type 1 or type 3"
+    # selection: "all"
+    # type_to_elements: ['O', 'H', 'C'] 
+    # dataset_args :
+    #   cutoff: 5.0
+    #   atoms_selections:
+    #     - "type 3 and id 1538"
+    #   max_angular: 1 # only for SOAP_PS
+    #   # angular_list : [4,6] # only for SOAP
+    #   n_radial: 1
+    ###########################
+
+    ##### MAPI DATASET #####
+    tprfile: ./data/MAPI/MAPI_700K_10ns/MAPI.data
+    xtcfile: ./data/MAPI/MAPI_700K_10ns/system.xtc
+    selection: "all"
+    type_to_elements: ['Pb', 'I', 'H', 'N', 'C', 'H']
+    dataset_args :
+      cutoff: 5.0
+      atoms_selections:
+        - "type 1"
+      excluded_types: [3, 4, 5, 6]  # exclude H,N,C
+      max_angular: 1 # only for SOAP_PS
+      # angular_list : [4,6] # only for SOAP
+      n_radial: 1
+    ###########################
+  
+    dataset_size: 5000
+    sequential: False
+    train_size : 4000
+    batch_size : 256
+    validation_size : 1000
+    val_batch_size : 256
+    dataset_type : "SOAP_PS"
+    num_workers: 4
+    norm_type: "minmax"
+    test_full_dataset: True
+
+network_name: DVAE
+network_args:
+    network: [100, 50, 2]
+    beta: 0.7
+    batch_norm: True
+    normIn: False
+    scheduler: True
+    scheduler_args:
+        cooldown: 50
+
+

@@ -1,0 +1,29 @@
+channels:
+  - metatensor
+  - conda-forge
+dependencies:
+  - python=3.13
+  - pip
+  - matplotlib
+  - pip:
+    - --extra-index-url https://download.pytorch.org/whl/cu122
+    - torch==2.7.1
+    - torch-geometric
+    - lightning
+    - wandb[media]
+    - pandas
+    - ase
+    - numpy
+    - scipy
+    - scikit-learn
+    - imageio
+    - MDAnalysis
+    - MDTraj
+    - darts
+    - chemiscope
+    - ipi>=3.1.5
+    - metatomic==0.1.0
+    - metatomic-torch==0.1.5
+    - featomic-torch
+variables:
+  PIP_EXTRA_INDEX_URL: https://download.pytorch.org/whl/cu122

@@ -1,0 +1,5 @@
+__pycache__/
+.cenv/
+.DS_Store
+*_runs
+*_logs

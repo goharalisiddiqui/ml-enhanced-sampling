@@ -1,0 +1,62 @@
+units           real
+atom_style      full
+boundary        p p p
+
+pair_style      hybrid/overlay tersoff lj/charmm/coul/long 9.9 10. buck/coul/long 9.9 10.
+kspace_style    pppm 1.0e-4
+kspace_modify   diff ad
+
+bond_style      harmonic
+angle_style     harmonic
+
+special_bonds   amber
+dihedral_style  charmm
+
+read_data       MAPI
+replicate       2 2 1
+include         myp2/nonbonding.myp2
+
+group           frozen id 0 #blocks the first atom otherwise modify it
+group           free subtract all frozen
+
+minimize        0.0 0.0 100 1000
+
+# Fix one the first atom in space
+velocity        frozen set 0. 0. 0.
+fix             0 frozen setforce 0. 0. 0.    
+
+thermo          100
+thermo_style    custom step temp vol press etotal cella cellb cellc spcpu cpuremain
+
+fix             00 all momentum 1 linear 1 1 1 angular
+fix             fnpt free npt temp 1.0 300.0 100 iso 1.0 1.0 500
+
+dump            d1 all xtc 1000 system_eqil.xtc
+# dump_modify     d1 unwrap yes ## Can only be used with dcd or xtc dump
+dump            d2 all xyz 1000 system_equil.xyz
+dump_modify     d2 element Pb I H N C H
+write_data      MAPI.data nofix pair ij
+
+# Heating
+timestep        1.0
+run             10000
+
+# Equilibration
+unfix           fnpt
+fix             fnpt free npt temp 300.0 300.0 100 iso 1.0 1.0 500
+run             10000
+
+# Save checkpoint
+write_restart   MAPI.restart
+
+
+# MD run
+undump          d1
+undump          d2
+dump            d1 all xtc 1000 system.xtc
+# dump_modify     d1 unwrap yes ## Can only be used with dcd or xtc dump
+dump            d2 all xyz 1000 system.xyz
+dump_modify     d2 element Pb I H N C H
+reset_timestep  0
+
+run             10000000 # 10 ns
